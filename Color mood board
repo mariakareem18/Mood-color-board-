@@ -1,0 +1,140 @@
+import tkinter as tk
+
+class AuraSyncApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("🎨 AuraSync by Maria")
+        self.root.geometry("400x660")
+        
+        # Super colorful and cute aesthetic palettes 
+        self.moods = {
+            "🌸 Sweet Cotton Candy": {
+                "bg": "#FFF0F5", "text": "#D1477D",
+                "palette": ["#FFB7B2", "#FFC6FF", "#BDB2FF", "#9BF6FF"]
+            },
+            "🍯 Honey Sunshine": {
+                "bg": "#FFFDF0", "text": "#B37D00",
+                "palette": ["#FFE57F", "#FFD54F", "#FFCA28", "#FFB300"]
+            },
+            "🔮 Magical Galaxy": {
+                "bg": "#F3E5F5", "text": "#6A1B9A",
+                "palette": ["#E1BEE7", "#CE93D8", "#B388FF", "#8C9EFF"]
+            },
+            "🍃 Fresh Matcha": {
+                "bg": "#F0F7F4", "text": "#386641",
+                "palette": ["#A7C957", "#F7E1D7", "#A3B18A", "#588157"]
+            },
+            "🎈 Neon Carnival": {
+                "bg": "#FFF2F2", "text": "#C70039",
+                "palette": ["#FF5733", "#FFC300", "#DAF7A6", "#33FFBD"]
+            }
+        }
+        
+        # Default playful and colorful background (Soft lavender-pink gradient vibe)
+        self.root.config(bg="#F9E8FA")
+        
+        # --- TOP HEADER AREA ---
+        self.header_frame = tk.Frame(root, bg="#F9E8FA")
+        self.header_frame.pack(pady=15)
+        
+        # Creator Ribbon Badge at the very top
+        self.creator_label = tk.Label(
+            self.header_frame, text="🎀 Created by Maria Kareem Bux 🎀", 
+            font=("Helvetica", 11, "bold"), bg="#FFFFFF", fg="#D1477D",
+            padx=12, pady=4, bd=1, relief="ridge"
+        )
+        self.creator_label.pack(pady=(5, 10))
+        
+        # Main App Name with Sticker accents
+        self.title_label = tk.Label(
+            self.header_frame, text="✨ AuraSync ✨", 
+            font=("Helvetica", 24, "bold"), bg="#F9E8FA", fg="#4A154B"
+        )
+        self.title_label.pack()
+        
+        self.subtitle_label = tk.Label(
+            self.header_frame, text="🎈 Pick a sticker button to transform your world! 🎈", 
+            font=("Helvetica", 10, "bold"), bg="#F9E8FA", fg="#6B6B6B"
+        )
+        self.subtitle_label.pack(pady=4)
+        
+        # --- INTERACTIVE MOOD BUTTONS ---
+        self.btn_frame = tk.Frame(root, bg="#F9E8FA")
+        self.btn_frame.pack(pady=10)
+        
+        # Soft, pill-shaped looking responsive buttons
+        for mood_name in self.moods.keys():
+            btn = tk.Button(
+                self.btn_frame, text=mood_name, font=("Helvetica", 12, "bold"),
+                width=24, pady=6, bg="#FFFFFF", fg="#333333",
+                activebackground="#FFE3F4", bd=0, highlightthickness=2, 
+                highlightbackground="#E8A7D0", relief="flat",
+                command=lambda m=mood_name: self.change_mood(m)
+            )
+            btn.pack(pady=5)
+            
+        # Graphical Divider Line
+        self.divider = tk.Frame(root, height=2, bg="#E8A7D0", width=340)
+        self.divider.pack(pady=15)
+        
+        # --- PALETTE SWATCH SECTION ---
+        self.palette_label = tk.Label(
+            root, text="🧸 Your Custom Visual Palette 🧸", 
+            font=("Helvetica", 12, "bold"), bg="#F9E8FA", fg="#4A154B"
+        )
+        self.palette_label.pack(pady=2)
+        
+        # Visual color slots frame
+        self.color_slots = []
+        self.palette_frame = tk.Frame(root, bg="#F9E8FA")
+        self.palette_frame.pack(pady=10)
+        
+        # Generate color display cards
+        for i in range(4):
+            slot_frame = tk.Frame(self.palette_frame, bg="#F9E8FA")
+            slot_frame.pack(side="left", padx=8)
+            
+            box = tk.Label(slot_frame, width=7, height=4, bg="#FFFFFF", relief="flat", bd=0)
+            box.pack()
+            
+            label = tk.Label(slot_frame, text="-", font=("Courier", 8, "bold"), bg="#F9E8FA", fg="#555555")
+            label.pack(pady=4)
+            
+            self.color_slots.append((box, label, slot_frame))
+
+        # --- FOOTER ---
+        self.footer_frame = tk.Frame(root, bg="#F9E8FA")
+        self.footer_frame.pack(side="bottom", fill="x", pady=15)
+        
+        self.credit_label = tk.Label(
+            self.footer_frame, text="⭐ AuraSync Mobile Engine v1.2 ⭐", 
+            font=("Helvetica", 9, "bold"), bg="#F9E8FA", fg="#A87EA9"
+        )
+        self.credit_label.pack()
+
+    def change_mood(self, mood_name):
+        data = self.moods[mood_name]
+        
+        # Change background colors dynamically based on choice
+        self.root.config(bg=data["bg"])
+        self.header_frame.config(bg=data["bg"])
+        self.title_label.config(bg=data["bg"], fg=data["text"])
+        self.subtitle_label.config(bg=data["bg"], fg=data["text"])
+        self.palette_label.config(bg=data["bg"], fg=data["text"])
+        self.btn_frame.config(bg=data["bg"])
+        self.palette_frame.config(bg=data["bg"])
+        self.footer_frame.config(bg=data["bg"])
+        self.credit_label.config(bg=data["bg"], fg=data["text"])
+        self.divider.config(bg=data["text"])
+        
+        # Sync the matching color tiles and their labels
+        for idx, color in enumerate(data["palette"]):
+            box, label, frame = self.color_slots[idx]
+            box.config(bg=color)
+            label.config(text=color, bg=data["bg"], fg=data["text"])
+            frame.config(bg=data["bg"])
+
+if __name__ == "__main__":
+    window = tk.Tk()
+    app = AuraSyncApp(window)
+    window.mainloop()
