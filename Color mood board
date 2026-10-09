@@ -1,140 +1,211 @@
-import tkinter as tk
 
-class AuraSyncApp:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("🎨 AuraSync by Maria")
-        self.root.geometry("400x660")
-        
-        # Super colorful and cute aesthetic palettes 
-        self.moods = {
-            "🌸 Sweet Cotton Candy": {
-                "bg": "#FFF0F5", "text": "#D1477D",
-                "palette": ["#FFB7B2", "#FFC6FF", "#BDB2FF", "#9BF6FF"]
-            },
-            "🍯 Honey Sunshine": {
-                "bg": "#FFFDF0", "text": "#B37D00",
-                "palette": ["#FFE57F", "#FFD54F", "#FFCA28", "#FFB300"]
-            },
-            "🔮 Magical Galaxy": {
-                "bg": "#F3E5F5", "text": "#6A1B9A",
-                "palette": ["#E1BEE7", "#CE93D8", "#B388FF", "#8C9EFF"]
-            },
-            "🍃 Fresh Matcha": {
-                "bg": "#F0F7F4", "text": "#386641",
-                "palette": ["#A7C957", "#F7E1D7", "#A3B18A", "#588157"]
-            },
-            "🎈 Neon Carnival": {
-                "bg": "#FFF2F2", "text": "#C70039",
-                "palette": ["#FF5733", "#FFC300", "#DAF7A6", "#33FFBD"]
-            }
-        }
-        
-        # Default playful and colorful background (Soft lavender-pink gradient vibe)
-        self.root.config(bg="#F9E8FA")
-        
-        # --- TOP HEADER AREA ---
-        self.header_frame = tk.Frame(root, bg="#F9E8FA")
-        self.header_frame.pack(pady=15)
-        
-        # Creator Ribbon Badge at the very top
-        self.creator_label = tk.Label(
-            self.header_frame, text="🎀 Created by Maria Kareem Bux 🎀", 
-            font=("Helvetica", 11, "bold"), bg="#FFFFFF", fg="#D1477D",
-            padx=12, pady=4, bd=1, relief="ridge"
-        )
-        self.creator_label.pack(pady=(5, 10))
-        
-        # Main App Name with Sticker accents
-        self.title_label = tk.Label(
-            self.header_frame, text="✨ AuraSync ✨", 
-            font=("Helvetica", 24, "bold"), bg="#F9E8FA", fg="#4A154B"
-        )
-        self.title_label.pack()
-        
-        self.subtitle_label = tk.Label(
-            self.header_frame, text="🎈 Pick a sticker button to transform your world! 🎈", 
-            font=("Helvetica", 10, "bold"), bg="#F9E8FA", fg="#6B6B6B"
-        )
-        self.subtitle_label.pack(pady=4)
-        
-        # --- INTERACTIVE MOOD BUTTONS ---
-        self.btn_frame = tk.Frame(root, bg="#F9E8FA")
-        self.btn_frame.pack(pady=10)
-        
-        # Soft, pill-shaped looking responsive buttons
-        for mood_name in self.moods.keys():
-            btn = tk.Button(
-                self.btn_frame, text=mood_name, font=("Helvetica", 12, "bold"),
-                width=24, pady=6, bg="#FFFFFF", fg="#333333",
-                activebackground="#FFE3F4", bd=0, highlightthickness=2, 
-                highlightbackground="#E8A7D0", relief="flat",
-                command=lambda m=mood_name: self.change_mood(m)
+from kivy.app import App
+from kivy.lang import Builder
+from kivy.core.clipboard import Clipboard
+from kivy.animation import Animation
+from kivy.utils import get_color_from_hex
+from kivy.uix.button import Button
+
+KV = """
+#:import dp kivy.metrics.dp
+
+FloatLayout:
+    canvas.before:
+        Color:
+            rgba: 0.98, 0.96, 1, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(20)
+        spacing: dp(12)
+
+        Label:
+            text: "[b]COLOR MOOD BOARD[/b]"
+            markup: True
+            font_size: "27sp"
+            color: 0.32, 0.22, 0.50, 1
+            size_hint_y: None
+            height: dp(48)
+
+        Label:
+            text: "Pick your vibe, find your colors ✨"
+            font_size: "15sp"
+            color: 0.48, 0.40, 0.57, 1
+            size_hint_y: None
+            height: dp(25)
+
+        Label:
+            text: "HOW ARE YOU FEELING TODAY?"
+            font_size: "13sp"
+            bold: True
+            color: 0.43, 0.33, 0.54, 1
+            size_hint_y: None
+            height: dp(35)
+
+        GridLayout:
+            id: mood_buttons
+            cols: 3
+            spacing: dp(9)
+            size_hint_y: None
+            height: dp(118)
+
+        Label:
+            id: mood_title
+            text: "Your colors are waiting! 💖"
+            font_size: "20sp"
+            bold: True
+            color: 0.32, 0.22, 0.50, 1
+            size_hint_y: None
+            height: dp(42)
+
+        Label:
+            id: mood_description
+            text: "Choose a mood above to begin."
+            font_size: "13sp"
+            color: 0.48, 0.40, 0.57, 1
+            size_hint_y: None
+            height: dp(28)
+
+        GridLayout:
+            id: palette
+            cols: 3
+            spacing: dp(10)
+            size_hint_y: None
+            height: dp(155)
+
+        Label:
+            id: quote
+            text: "A little color can change your day 🌷"
+            font_size: "14sp"
+            italic: True
+            color: 0.48, 0.40, 0.57, 1
+            size_hint_y: None
+            height: dp(38)
+
+        Button:
+            text: "🎲  Surprise Me!"
+            size_hint_y: None
+            height: dp(48)
+            background_normal: ""
+            background_color: 0.65, 0.48, 0.88, 1
+            font_size: "16sp"
+            bold: True
+            on_release: app.surprise()
+
+        Widget:
+
+        Label:
+            text: "[b]Crafted by Maria Kareem Bux[/b]  ♡"
+            markup: True
+            font_size: "14sp"
+            color: 0.53, 0.37, 0.65, 1
+            size_hint_y: None
+            height: dp(32)
+"""
+
+MOODS = {
+    "Happy": {
+        "emoji": "☀️",
+        "description": "Bright days & happy hearts!",
+        "colors": ["#FFD166", "#FF8FA3", "#9BE7C4"],
+        "quote": "Let your happiness shine! ☀️"
+    },
+    "Calm": {
+        "emoji": "☁️",
+        "description": "Breathe in peace & softness.",
+        "colors": ["#A8DADC", "#B8C0FF", "#D8F3DC"],
+        "quote": "Slow down. You are doing fine. 🌿"
+    },
+    "Romantic": {
+        "emoji": "💗",
+        "description": "Soft pinks & dreamy feelings.",
+        "colors": ["#FFB3C6", "#FADADD", "#CDB4DB"],
+        "quote": "Love is in every little detail. 💕"
+    },
+    "Creative": {
+        "emoji": "🎨",
+        "description": "Think boldly, create freely!",
+        "colors": ["#CDB4DB", "#FFC6A8", "#A0C4FF"],
+        "quote": "Your imagination has no limits! ✨"
+    },
+    "Energetic": {
+        "emoji": "⚡",
+        "description": "Big energy, bold colors!",
+        "colors": ["#FF6B6B", "#FFD93D", "#6BCB77"],
+        "quote": "Make today wonderfully yours! ⚡"
+    },
+    "Sad": {
+        "emoji": "🌧️",
+        "description": "Gentle shades for a softer day.",
+        "colors": ["#A2D2FF", "#CDB4DB", "#FFC8DD"],
+        "quote": "Every feeling deserves some kindness. 💜"
+    }
+}
+
+
+class MoodBoardApp(App):
+    def build(self):
+        self.current_mood = "Happy"
+        self.root = Builder.load_string(KV)
+
+        for mood, data in MOODS.items():
+            button = Button(
+                text=f"{data['emoji']}\\n{mood}",
+                font_size="15sp",
+                bold=True,
+                background_normal="",
+                background_color=get_color_from_hex(
+                    data["colors"][0]
+                ),
+                color=(0.22, 0.18, 0.30, 1)
             )
-            btn.pack(pady=5)
-            
-        # Graphical Divider Line
-        self.divider = tk.Frame(root, height=2, bg="#E8A7D0", width=340)
-        self.divider.pack(pady=15)
-        
-        # --- PALETTE SWATCH SECTION ---
-        self.palette_label = tk.Label(
-            root, text="🧸 Your Custom Visual Palette 🧸", 
-            font=("Helvetica", 12, "bold"), bg="#F9E8FA", fg="#4A154B"
-        )
-        self.palette_label.pack(pady=2)
-        
-        # Visual color slots frame
-        self.color_slots = []
-        self.palette_frame = tk.Frame(root, bg="#F9E8FA")
-        self.palette_frame.pack(pady=10)
-        
-        # Generate color display cards
-        for i in range(4):
-            slot_frame = tk.Frame(self.palette_frame, bg="#F9E8FA")
-            slot_frame.pack(side="left", padx=8)
-            
-            box = tk.Label(slot_frame, width=7, height=4, bg="#FFFFFF", relief="flat", bd=0)
-            box.pack()
-            
-            label = tk.Label(slot_frame, text="-", font=("Courier", 8, "bold"), bg="#F9E8FA", fg="#555555")
-            label.pack(pady=4)
-            
-            self.color_slots.append((box, label, slot_frame))
+            button.bind(
+                on_release=lambda instance, m=mood: self.show_mood(m)
+            )
+            self.root.ids.mood_buttons.add_widget(button)
 
-        # --- FOOTER ---
-        self.footer_frame = tk.Frame(root, bg="#F9E8FA")
-        self.footer_frame.pack(side="bottom", fill="x", pady=15)
-        
-        self.credit_label = tk.Label(
-            self.footer_frame, text="⭐ AuraSync Mobile Engine v1.2 ⭐", 
-            font=("Helvetica", 9, "bold"), bg="#F9E8FA", fg="#A87EA9"
-        )
-        self.credit_label.pack()
+        self.show_mood("Happy")
+        return self.root
 
-    def change_mood(self, mood_name):
-        data = self.moods[mood_name]
-        
-        # Change background colors dynamically based on choice
-        self.root.config(bg=data["bg"])
-        self.header_frame.config(bg=data["bg"])
-        self.title_label.config(bg=data["bg"], fg=data["text"])
-        self.subtitle_label.config(bg=data["bg"], fg=data["text"])
-        self.palette_label.config(bg=data["bg"], fg=data["text"])
-        self.btn_frame.config(bg=data["bg"])
-        self.palette_frame.config(bg=data["bg"])
-        self.footer_frame.config(bg=data["bg"])
-        self.credit_label.config(bg=data["bg"], fg=data["text"])
-        self.divider.config(bg=data["text"])
-        
-        # Sync the matching color tiles and their labels
-        for idx, color in enumerate(data["palette"]):
-            box, label, frame = self.color_slots[idx]
-            box.config(bg=color)
-            label.config(text=color, bg=data["bg"], fg=data["text"])
-            frame.config(bg=data["bg"])
+    def show_mood(self, mood):
+        self.current_mood = mood
+        data = MOODS[mood]
+
+        self.root.ids.mood_title.text = (
+            f"{data['emoji']}  {mood} Mood"
+        )
+        self.root.ids.mood_description.text = data["description"]
+        self.root.ids.quote.text = data["quote"]
+
+        palette = self.root.ids.palette
+        palette.clear_widgets()
+
+        for color in data["colors"]:
+            card = Button(
+                text=f"♥\\n{color}",
+                font_size="15sp",
+                bold=True,
+                background_normal="",
+                background_color=get_color_from_hex(color),
+                color=(0.20, 0.18, 0.27, 1)
+            )
+            card.bind(
+                on_release=lambda instance, c=color: self.copy_color(c)
+            )
+            palette.add_widget(card)
+
+    def copy_color(self, color):
+        Clipboard.copy(color)
+        self.root.ids.quote.text = f"Copied {color} to clipboard! 💖"
+
+    def surprise(self):
+        import random
+        mood = random.choice(list(MOODS.keys()))
+        self.show_mood(mood)
+
 
 if __name__ == "__main__":
-    window = tk.Tk()
-    app = AuraSyncApp(window)
-    window.mainloop()
+    MoodBoardApp().run()
